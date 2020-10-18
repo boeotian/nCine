@@ -12,16 +12,14 @@ namespace ncine {
 class AudioLoaderOgg : public IAudioLoader
 {
   public:
-	explicit AudioLoaderOgg(const char *filename);
 	explicit AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle);
 	~AudioLoaderOgg() override;
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
-	void rewind() const override;
+	nctl::UniquePtr<IAudioReader> createReader() override;
 
   private:
 	/// Vorbisfile handle
-	mutable OggVorbis_File oggFile_;
+	OggVorbis_File oggFile_;
 
 	/// Deleted copy constructor
 	AudioLoaderOgg(const AudioLoaderOgg &) = delete;

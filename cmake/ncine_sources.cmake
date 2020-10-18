@@ -9,6 +9,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/TimeStamp.cpp
 	${NCINE_ROOT}/src/Timer.cpp
 	${NCINE_ROOT}/src/FrameTimer.cpp
+	${NCINE_ROOT}/src/FontData.cpp
 	${NCINE_ROOT}/src/Font.cpp
 	${NCINE_ROOT}/src/FntParser.cpp
 	${NCINE_ROOT}/src/FontGlyph.cpp
@@ -33,6 +34,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/TextureLoaderDds.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderPvr.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp
+	${NCINE_ROOT}/src/graphics/TextureData.cpp
 	${NCINE_ROOT}/src/graphics/Texture.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp

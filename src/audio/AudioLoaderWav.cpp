@@ -1,5 +1,6 @@
-#include <cstring>
 #include "AudioLoaderWav.h"
+#include "return_macros.h"
+#include "AudioReaderWav.h"
 
 namespace ncine {
 
@@ -7,27 +8,23 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-AudioLoaderWav::AudioLoaderWav(const char *filename)
-    : AudioLoaderWav(IFile::createFileHandle(filename))
-{
-}
-
 AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
     : IAudioLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
+	RETURN_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
 
 	WavHeader header;
 	fileHandle_->read(&header, sizeof(WavHeader));
 
 	if (strncmp(header.chunkId, "RIFF", 4) != 0 || strncmp(header.format, "WAVE", 4) != 0)
-		FATAL_MSG_X("\"%s\" is not a WAV file", fileHandle_->filename());
+		RETURN_MSG_X("\"%s\" is not a WAV file", fileHandle_->filename());
 	if (strncmp(header.subchunk1Id, "fmt ", 4) != 0)
-		FATAL_MSG_X("\"%s\" is an invalid WAV file", fileHandle_->filename());
+		RETURN_MSG_X("\"%s\" is an invalid WAV file", fileHandle_->filename());
 
 	if (IFile::int16FromLE(header.audioFormat) != 1)
-		FATAL_MSG_X("Data in \"%s\" is not in PCM format", fileHandle_->filename());
+		RETURN_MSG_X("Data in \"%s\" is not in PCM format", fileHandle_->filename());
 
 	bytesPerSample_ = IFile::int16FromLE(header.bitsPerSample) / 8;
 	numChannels_ = IFile::int16FromLE(header.numChannels);
@@ -37,35 +34,37 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 	duration_ = float(numSamples_) / frequency_;
 
 	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
+	RETURN_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
+
+	constructionInfo_.seek = fileHandle_->tell();
+	hasLoaded_ = true;
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned long int AudioLoaderWav::read(char *buffer, unsigned long int bufferSize) const
+nctl::UniquePtr<IAudioReader> AudioLoaderWav::createReader()
 {
-	ASSERT(buffer);
-	ASSERT(bufferSize > 0);
-
-	unsigned long int bytes = 0;
-	unsigned long int bufferSeek = 0;
-
-	do
+	if (fileHandle_ == nullptr)
 	{
-		// Read up to a buffer's worth of decoded sound data
-		bytes = fileHandle_->read(buffer, bufferSize);
-		FATAL_ASSERT_MSG(bytes > 0, "Zero bytes read from file");
-		bufferSeek += bytes;
-	} while (bytes > 0 && bufferSize - bufferSeek > 0);
+		if (constructionInfo_.bufferPtr == nullptr)
+			fileHandle_ = IFile::createFileHandle(constructionInfo_.name.data());
+		else
+			fileHandle_ = IFile::createFromMemory(constructionInfo_.name.data(), constructionInfo_.bufferPtr, constructionInfo_.bufferSize);
 
-	return bufferSeek;
-}
+#ifdef __ANDROID__
+		if (fileHandle_->type() == IFile::FileType::ASSET)
+			fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
+		else
+#endif
+			fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
-void AudioLoaderWav::rewind() const
-{
-	clearerr(fileHandle_->ptr());
-	fileHandle_->seek(sizeof(WavHeader), SEEK_SET);
+		fileHandle_->seek(constructionInfo_.seek, SEEK_SET);
+	}
+	ASSERT(fileHandle_->isOpened());
+
+	return nctl::makeUnique<AudioReaderWav>(nctl::move(fileHandle_));
 }
 
 }

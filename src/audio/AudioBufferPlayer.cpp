@@ -10,10 +10,11 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
-    : audioBuffer_(audioBuffer)
+    : IAudioPlayer(ObjectType::AUDIOBUFFER_PLAYER), audioBuffer_(audioBuffer)
 {
 	ASSERT(audioBuffer);
-	type_ = ObjectType::AUDIOBUFFER_PLAYER;
+	if (audioBuffer_)
+		setName(audioBuffer->name());
 }
 
 ///////////////////////////////////////////////////////////
@@ -133,7 +134,11 @@ void AudioBufferPlayer::updateState()
 		alGetSourcei(sourceId_, AL_SOURCE_STATE, &alState);
 
 		if (alState != AL_PLAYING)
+		{
 			state_ = PlayerState::STOPPED;
+			// Detach the buffer from source
+			alSourcei(sourceId_, AL_BUFFER, 0);
+		}
 		else
 			alSourcei(sourceId_, AL_LOOPING, isLooping_);
 	}

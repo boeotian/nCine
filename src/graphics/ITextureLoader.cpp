@@ -20,14 +20,9 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ITextureLoader::ITextureLoader(const char *filename)
-    : ITextureLoader(IFile::createFileHandle(filename))
-{
-}
-
 ITextureLoader::ITextureLoader(nctl::UniquePtr<IFile> fileHandle)
-    : fileHandle_(nctl::move(fileHandle)), width_(0), height_(0),
-      bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
+    : hasLoaded_(false), fileHandle_(nctl::move(fileHandle)), width_(0),
+      height_(0), bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
 }
 
@@ -51,27 +46,34 @@ const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
 	const GLubyte *pixels = nullptr;
 
-	if (mipMapCount_ > 1 && int(mipMapLevel) < mipMapCount_)
-		pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
-	else if (mipMapLevel == 0)
-		pixels = pixels_.get();
+	if (pixels_ != nullptr)
+	{
+		if (mipMapCount_ > 1 && int(mipMapLevel) < mipMapCount_)
+			pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
+		else if (mipMapLevel == 0)
+			pixels = pixels_.get();
+	}
 
 	return pixels;
 }
 
+const char *ITextureLoader::filename() const
+{
+	// An `InvalidTextureLoader` has no associated file handle
+	return fileHandle_ ? fileHandle_->filename() : nullptr;
+}
+
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFromMemory(bufferName, bufferPtr, bufferSize);
-	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", fileHandle->filename(), bufferPtr, bufferSize);
-	return createLoader(nctl::move(fileHandle), bufferName);
+	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", bufferName, bufferPtr, bufferSize);
+	return createLoader(nctl::move(IFile::createFromMemory(bufferName, bufferPtr, bufferSize)), bufferName);
 }
 
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filename)
 {
+	LOGI_X("Loading file: \"%s\"", filename);
 	// Creating a handle from IFile static method to detect assets file
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
-	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
-	return createLoader(nctl::move(fileHandle), filename);
+	return createLoader(nctl::move(IFile::createFileHandle(filename)), filename);
 }
 
 ///////////////////////////////////////////////////////////
@@ -80,6 +82,8 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filen
 
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename)
 {
+	fileHandle->setExitOnFailToOpen(false);
+
 	if (fs::hasExtension(filename, "dds"))
 		return nctl::makeUnique<TextureLoaderDds>(nctl::move(fileHandle));
 	else if (fs::hasExtension(filename, "pvr"))
@@ -102,7 +106,7 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFi
 	{
 		LOGF_X("Extension unknown: \"%s\"", fs::extension(filename));
 		fileHandle.reset(nullptr);
-		exit(EXIT_FAILURE);
+		return nctl::makeUnique<InvalidTextureLoader>(nctl::move(fileHandle));
 	}
 }
 

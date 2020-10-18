@@ -19,7 +19,8 @@ class DLL_PUBLIC IAudioPlayer : public Object
 		STOPPED
 	};
 
-	IAudioPlayer();
+	IAudioPlayer(ObjectType type, const char *name);
+	IAudioPlayer(ObjectType type);
 	~IAudioPlayer() override {}
 
 	/// Returns the OpenAL id of the player source

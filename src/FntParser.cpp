@@ -9,14 +9,14 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-FntParser::FntParser(const char *bufferPtr, unsigned long int bufferSize)
-    : numPageTags_(0), numCharTags_(0), numKerningTags_(0)
+FntParser::FntParser(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
+    : numPageTags_(0), numCharTags_(0), numKerningTags_(0), filename_(bufferName)
 {
 	parseFntBuffer(bufferPtr, bufferSize);
 }
 
 FntParser::FntParser(const char *fntFilename)
-    : numPageTags_(0), numCharTags_(0), numKerningTags_(0)
+    : numPageTags_(0), numCharTags_(0), numKerningTags_(0), filename_(fntFilename)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(fntFilename);
 	fileHandle->open(IFile::OpenMode::READ);

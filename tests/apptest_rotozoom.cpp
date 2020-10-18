@@ -6,9 +6,13 @@
 #include "apptest_datapath.h"
 
 #define LOAD_FROM_MEMORY (0)
+#define USE_TEXTUREDATA (0)
 
 #if LOAD_FROM_MEMORY
 	#include <ncine/IFile.h>
+#endif
+#if USE_TEXTUREDATA
+	#include <ncine/TextureData.h>
 #endif
 
 namespace {
@@ -48,9 +52,21 @@ void MyEventHandler::onInit()
 	megaTextureFile->read(megaTextureBuffer, megaTextureBufferSize);
 	megaTextureFile->close();
 
+	#if USE_TEXTUREDATA
+	nc::TextureData megaTextureData(TextureFile, megaTextureBuffer, megaTextureBufferSize);
+	FATAL_ASSERT(megaTextureData.isValid());
+	megaTexture_ = nctl::makeUnique<nc::Texture>(megaTextureData);
+	#else
 	megaTexture_ = nctl::makeUnique<nc::Texture>(TextureFile, megaTextureBuffer, megaTextureBufferSize);
+	#endif
 #else
+	#if USE_TEXTUREDATA
+	nc::TextureData megaTextureData(prefixDataPath("textures", TextureFile).data());
+	FATAL_ASSERT(megaTextureData.isValid());
+	megaTexture_ = nctl::makeUnique<nc::Texture>(megaTextureData);
+	#else
 	megaTexture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
+	#endif
 #endif
 
 	texRects.pushBack(nc::Recti(0, 0, 128, 128));

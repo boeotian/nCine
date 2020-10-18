@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+class TextureData;
 class ITextureLoader;
 class GLTexture;
 
@@ -39,6 +40,10 @@ class DLL_PUBLIC Texture : public Object
 	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
 	Texture(const char *filename, Vector2i size);
+
+	Texture(const TextureData &texData);
+	Texture(const TextureData &texData, int width, int height);
+	Texture(const TextureData &texData, Vector2i size);
 
 	~Texture() override;
 

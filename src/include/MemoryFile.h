@@ -21,6 +21,9 @@ class MemoryFile : public IFile
 	unsigned long int read(void *buffer, unsigned long int bytes) const override;
 	unsigned long int write(void *buffer, unsigned long int bytes) override;
 
+	inline unsigned char *bufferPtr() { return bufferPtr_; }
+	inline const unsigned char *bufferPtr() const { return bufferPtr_; }
+
   private:
 	unsigned char *bufferPtr_;
 	/// \note Modified by `seek` and `tell` constant methods

@@ -15,6 +15,9 @@ class ITextureLoader
   public:
 	virtual ~ITextureLoader() {}
 
+	/// Returns true if the texture has been correctly loaded
+	inline bool hasLoaded() const { return hasLoaded_; }
+
 	/// Returns texture width
 	inline int width() const { return width_; }
 	/// Returns texture height
@@ -36,12 +39,17 @@ class ITextureLoader
 	/// Returns the pointer to pixel data for the specified MIP map level
 	const GLubyte *pixels(unsigned int mipMapLevel) const;
 
+	/// Returns the name of the buffer or the file managed by the file handle
+	const char *filename() const;
+
 	/// Returns the proper texture loader according to the memory buffer name extension
 	static nctl::UniquePtr<ITextureLoader> createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Returns the proper texture loader according to the file extension
 	static nctl::UniquePtr<ITextureLoader> createFromFile(const char *filename);
 
   protected:
+	/// A flag indicating if the loading process has been successful
+	bool hasLoaded_;
 	/// Texture file handle
 	nctl::UniquePtr<IFile> fileHandle_;
 
@@ -56,7 +64,6 @@ class ITextureLoader
 	TextureFormat texFormat_;
 	nctl::UniquePtr<GLubyte[]> pixels_;
 
-	explicit ITextureLoader(const char *filename);
 	explicit ITextureLoader(nctl::UniquePtr<IFile> fileHandle);
 
 	static nctl::UniquePtr<ITextureLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);
@@ -64,6 +71,14 @@ class ITextureLoader
 	void loadPixels(GLenum internalFormat);
 	/// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
 	void loadPixels(GLenum internalFormat, GLenum type);
+};
+
+/// A class created when the texture file extension is not recognized
+class InvalidTextureLoader : ITextureLoader
+{
+  public:
+	explicit InvalidTextureLoader(nctl::UniquePtr<IFile> fileHandle)
+	    : ITextureLoader(nctl::move(fileHandle)) {}
 };
 
 }

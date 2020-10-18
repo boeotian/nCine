@@ -2,6 +2,7 @@
 #include "common_headers.h"
 #include "common_macros.h"
 #include "Texture.h"
+#include "TextureData.h"
 #include "ITextureLoader.h"
 #include "GLTexture.h"
 #include "RenderStatistics.h"
@@ -62,6 +63,34 @@ Texture::Texture(const char *filename, int width, int height)
 
 Texture::Texture(const char *filename, Vector2i size)
     : Texture(filename, size.x, size.y)
+{
+}
+
+Texture::Texture(const TextureData &texData)
+    : Texture(texData, 0, 0)
+{
+}
+
+Texture::Texture(const TextureData &texData, int width, int height)
+    : Object(ObjectType::TEXTURE, texData.filename()), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
+      width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), numChannels_(0), dataSize_(0),
+      minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
+{
+	FATAL_ASSERT(texData.isValid());
+
+	ZoneScoped;
+	ZoneText(texData.filename(), strnlen(texData.filename(), nctl::String::MaxCStringLength));
+	setName(texData.filename());
+	glTexture_->bind();
+	setGLTextureLabel(texData.filename());
+
+	load(*texData.texLoader_.get(), width, height);
+
+	RenderStatistics::addTexture(dataSize_);
+}
+
+Texture::Texture(const TextureData &texData, Vector2i size)
+    : Texture(texData, size.x, size.y)
 {
 }
 

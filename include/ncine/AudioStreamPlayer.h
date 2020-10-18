@@ -15,6 +15,8 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 	AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a player from a file
 	explicit AudioStreamPlayer(const char *filename);
+	/// Constructor creating a player from an audio data class
+	explicit AudioStreamPlayer(AudioData &audioData);
 	~AudioStreamPlayer() override;
 
 	inline unsigned int bufferId() const override { return audioStream_.bufferId(); }

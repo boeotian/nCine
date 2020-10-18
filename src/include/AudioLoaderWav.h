@@ -9,11 +9,9 @@ namespace ncine {
 class AudioLoaderWav : public IAudioLoader
 {
   public:
-	explicit AudioLoaderWav(const char *filename);
 	explicit AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle);
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
-	void rewind() const override;
+	nctl::UniquePtr<IAudioReader> createReader() override;
 
   private:
 	/// Header for the RIFF WAVE format
@@ -35,6 +33,9 @@ class AudioLoaderWav : public IAudioLoader
 		char subchunk2Id[4];
 		uint32_t subchunk2Size;
 	};
+
+  public:
+	static const unsigned int HeaderSize = sizeof(WavHeader);
 };
 
 }

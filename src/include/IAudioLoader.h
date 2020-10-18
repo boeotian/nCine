@@ -3,24 +3,18 @@
 
 #include "IFile.h"
 #include <nctl/UniquePtr.h>
+#include "IAudioReader.h"
 
 namespace ncine {
 
 /// Audio loader interface class
-class DLL_PUBLIC IAudioLoader
+class IAudioLoader
 {
   public:
 	virtual ~IAudioLoader() {}
 
-	/// Decodes audio data in a specified buffer
-	/*!
-	 * \param buffer Buffer pointer
-	 * \param bufferSize Buffer size in bytes
-	 * \return Number of bytes read
-	 */
-	virtual unsigned long int read(char *buffer, unsigned long int bufferSize) const = 0;
-	/// Resets the audio file seek value
-	virtual void rewind() const = 0;
+	/// Returns true if the audio has been correctly loaded
+	inline bool hasLoaded() const { return hasLoaded_; }
 
 	/// Returns the duration in seconds
 	inline float duration() const { return duration_; }
@@ -36,12 +30,20 @@ class DLL_PUBLIC IAudioLoader
 	/// Returns the decoded buffer size in bytes
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
+	/// Returns the name of the buffer or the file managed by the file handle
+	const char *filename() const;
+
 	/// Returns the proper audio loader according to the memory buffer name extension
 	static nctl::UniquePtr<IAudioLoader> createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Returns the proper audio loader according to the file extension
 	static nctl::UniquePtr<IAudioLoader> createFromFile(const char *filename);
 
+	/// Returns the proper audio reader according to the loader instance
+	virtual nctl::UniquePtr<IAudioReader> createReader() = 0;
+
   protected:
+	/// A flag indicating if the loading process has been successful
+	bool hasLoaded_;
 	/// Audio file handle
 	nctl::UniquePtr<IFile> fileHandle_;
 
@@ -57,10 +59,28 @@ class DLL_PUBLIC IAudioLoader
 	/// Duration in seconds
 	float duration_;
 
-	explicit IAudioLoader(const char *filename);
+	/// `IFile` construction arguments and information
+	struct ConstructionInfo
+	{
+		nctl::String name;
+		const unsigned char *bufferPtr;
+		unsigned long int bufferSize;
+		long int seek;
+	} constructionInfo_;
+
 	explicit IAudioLoader(nctl::UniquePtr<IFile> fileHandle);
 
 	static nctl::UniquePtr<IAudioLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);
+};
+
+/// A class created when the audio file extension is not recognized
+class InvalidAudioLoader : IAudioLoader
+{
+  public:
+	explicit InvalidAudioLoader(nctl::UniquePtr<IFile> fileHandle)
+	    : IAudioLoader(nctl::move(fileHandle)) {}
+
+	nctl::UniquePtr<IAudioReader> createReader() override { return nctl::makeUnique<InvalidAudioReader>(); }
 };
 
 }

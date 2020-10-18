@@ -9,8 +9,15 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-IAudioPlayer::IAudioPlayer()
-    : Object(ObjectType::BASE), sourceId_(IAudioDevice::UnavailableSource),
+IAudioPlayer::IAudioPlayer(ObjectType type, const char *name)
+    : Object(type, name), sourceId_(IAudioDevice::UnavailableSource),
+      state_(PlayerState::STOPPED), isLooping_(false),
+      gain_(1.0f), pitch_(1.0f), position_(0.0f, 0.0f, 0.0f)
+{
+}
+
+IAudioPlayer::IAudioPlayer(ObjectType type)
+    : Object(type), sourceId_(IAudioDevice::UnavailableSource),
       state_(PlayerState::STOPPED), isLooping_(false),
       gain_(1.0f), pitch_(1.0f), position_(0.0f, 0.0f, 0.0f)
 {

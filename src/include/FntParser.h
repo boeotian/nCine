@@ -107,7 +107,7 @@ class DLL_PUBLIC FntParser
 	};
 
 	/// Parses a FNT file from a memory buffer of the specified size
-	FntParser(const char *bufferPtr, unsigned long int bufferSize);
+	FntParser(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize);
 	/// Loads a FNT file in a memory buffer then parses it
 	explicit FntParser(const char *fntFilename);
 
@@ -144,6 +144,9 @@ class DLL_PUBLIC FntParser
 		return kerningTags_[index];
 	}
 
+	/// Returns the name of the buffer or file used to load data from
+	inline const char *filename() const { return filename_.data(); }
+
   private:
 	static const int MaxPageTags = 1;
 	static const int MaxCharTags = 1024;
@@ -167,6 +170,9 @@ class DLL_PUBLIC FntParser
 	unsigned int numPageTags_;
 	unsigned int numCharTags_;
 	unsigned int numKerningTags_;
+
+	/// File or buffer name used to load data from
+	nctl::String filename_;
 
 	/// Loads a FNT file in a memory buffer then parses it
 	void parseFntFile(IFile *fileHandle);

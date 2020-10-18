@@ -5,6 +5,7 @@
 
 namespace ncine {
 
+class AudioData;
 class IAudioLoader;
 
 /// A class representing an OpenAL buffer
@@ -13,11 +14,12 @@ class IAudioLoader;
 class DLL_PUBLIC AudioBuffer : public Object
 {
   public:
-	AudioBuffer();
 	/// A constructor creating a buffer from memory
 	AudioBuffer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a buffer from a file
 	explicit AudioBuffer(const char *filename);
+	/// Constructor creating a buffer from an audio data class
+	explicit AudioBuffer(AudioData &audioData);
 	~AudioBuffer() override;
 
 	/// Returns the OpenAL buffer id
@@ -41,13 +43,13 @@ class DLL_PUBLIC AudioBuffer : public Object
 	/// Buffer size in bytes
 	unsigned long bufferSize_;
 
+	/// Loads audio samples based on information from the audio loader and reader
+	void load(IAudioLoader &audioLoader);
+
 	/// Deleted copy constructor
 	AudioBuffer(const AudioBuffer &) = delete;
 	/// Deleted assignment operator
 	AudioBuffer &operator=(const AudioBuffer &) = delete;
-
-	/// Loads audio samples based on information from the audio loader
-	void load(const IAudioLoader *audioLoader);
 };
 
 }

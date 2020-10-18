@@ -1,10 +1,12 @@
 #ifndef CLASS_NCINE_AUDIOSTREAM
 #define CLASS_NCINE_AUDIOSTREAM
 
-#include "IAudioLoader.h"
 #include <nctl/StaticArray.h>
 
 namespace ncine {
+
+class AudioData;
+class IAudioReader;
 
 /// Audio stream class
 class DLL_PUBLIC AudioStream
@@ -47,13 +49,15 @@ class DLL_PUBLIC AudioStream
 	int frequency_;
 	/// OpenAL channel format enumeration
 	int format_;
-	/// The associated loader to continuosly stream decoded data
-	nctl::UniquePtr<IAudioLoader> audioLoader_;
+	/// The associated reader to continuosly stream decoded data
+	nctl::UniquePtr<IAudioReader> audioReader_;
 
 	/// Constructor creating an audio stream from a named memory buffer
 	AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
+	/// Constructor creating an audio stream from an audio data class
+	explicit AudioStream(AudioData &audioData);
 	/// Deleted copy constructor
 	AudioStream(const AudioStream &) = delete;
 	/// Deleted assignment operator

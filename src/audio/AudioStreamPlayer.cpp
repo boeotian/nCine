@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
 #include "AudioStreamPlayer.h"
+#include "AudioData.h"
 
 namespace ncine {
 
@@ -9,17 +10,18 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioStreamPlayer::AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
-    : audioStream_(bufferName, bufferPtr, bufferSize)
+    : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER, bufferName), audioStream_(bufferName, bufferPtr, bufferSize)
 {
-	type_ = ObjectType::AUDIOSTREAM_PLAYER;
-	setName(bufferName);
 }
 
 AudioStreamPlayer::AudioStreamPlayer(const char *filename)
-    : audioStream_(filename)
+    : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER, filename), audioStream_(filename)
 {
-	type_ = ObjectType::AUDIOSTREAM_PLAYER;
-	setName(filename);
+}
+
+AudioStreamPlayer::AudioStreamPlayer(AudioData &audioData)
+    : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER, audioData.filename()), audioStream_(audioData)
+{
 }
 
 AudioStreamPlayer::~AudioStreamPlayer()

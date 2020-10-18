@@ -1,4 +1,6 @@
+#include "return_macros.h"
 #include "AudioLoaderOgg.h"
+#include "AudioReaderOgg.h"
 
 namespace ncine {
 
@@ -35,18 +37,10 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-AudioLoaderOgg::AudioLoaderOgg(const char *filename)
-    : AudioLoaderOgg(IFile::createFileHandle(filename))
-{
-}
-
 AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
     : IAudioLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
-
-	// File is closed by `ov_clear()`
-	fileHandle_->setCloseOnDestruction(false);
 
 #ifdef __ANDROID__
 	if (fileHandle_->type() == IFile::FileType::ASSET)
@@ -55,14 +49,14 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 #endif
 		fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
-	if (ov_open_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks) != 0)
+	if (ov_test_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks) != 0)
 	{
-		LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
+		LOGF_X("Cannot open \"%s\" with ov_test_callbacks()", fileHandle_->filename());
 		fileHandle_->close();
-		exit(EXIT_FAILURE);
+		return;
 	}
 
-	// Get some information about the OGG file
+	// Get some information about the Ogg file
 	const vorbis_info *info = ov_info(&oggFile_, -1);
 
 	bytesPerSample_ = 2; // Ogg is always 16 bits
@@ -73,51 +67,45 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 	duration_ = float(ov_time_total(&oggFile_, -1));
 
 	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
+	RETURN_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
+	hasLoaded_ = true;
 }
 
 AudioLoaderOgg::~AudioLoaderOgg()
 {
-	ov_clear(&oggFile_);
+	// Checking if the ownership of the `IFile` pointer has been transferred to a reader
+	if (fileHandle_)
+		ov_clear(&oggFile_);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSize) const
+nctl::UniquePtr<IAudioReader> AudioLoaderOgg::createReader()
 {
-	ASSERT(buffer);
-	ASSERT(bufferSize > 0);
-
-	static int bitStream = 0;
-	long bytes = 0;
-	unsigned long int bufferSeek = 0;
-
-	do
+	if (fileHandle_ == nullptr)
 	{
-		// Read up to a buffer's worth of decoded sound data
-		// (0: little endian, 2: 16bit, 1: signed)
-		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, 0, 2, 1, &bitStream);
+		if (constructionInfo_.bufferPtr == nullptr)
+			fileHandle_ = IFile::createFileHandle(constructionInfo_.name.data());
+		else
+			fileHandle_ = IFile::createFromMemory(constructionInfo_.name.data(), constructionInfo_.bufferPtr, constructionInfo_.bufferSize);
 
-		if (bytes < 0)
-		{
-			ov_clear(&oggFile_);
-			FATAL_MSG_X("Error decoding at bitstream %d", bitStream);
-		}
+#ifdef __ANDROID__
+		if (fileHandle_->type() == IFile::FileType::ASSET)
+			fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
+		else
+#endif
+			fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
-		// Reset the static variable at the end of a decoding process
-		if (bytes <= 0)
-			bitStream = 0;
+		ov_test_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks);
 
-		bufferSeek += bytes;
-	} while (bytes > 0 && bufferSize - bufferSeek > 0);
+		// File is closed by `ov_clear()`
+		fileHandle_->setCloseOnDestruction(false);
+	}
+	ASSERT(fileHandle_->isOpened());
 
-	return bufferSeek;
-}
-
-void AudioLoaderOgg::rewind() const
-{
-	ov_raw_seek(&oggFile_, 0);
+	return nctl::makeUnique<AudioReaderOgg>(nctl::move(fileHandle_), oggFile_);
 }
 
 }
