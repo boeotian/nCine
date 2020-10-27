@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
 #include "common_macros.h"
+#include <nctl/CString.h>
 #include "AudioStream.h"
 #include "AudioData.h"
 #include "IAudioLoader.h"
@@ -19,7 +20,7 @@ AudioStream::AudioStream(const char *bufferName, const unsigned char *bufferPtr,
       nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
 {
 	ZoneScoped;
-	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
+	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
 
 	alGetError();
 	alGenBuffers(NumBuffers, buffersIds_.data());
@@ -43,7 +44,7 @@ AudioStream::AudioStream(const char *filename)
       nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
 {
 	ZoneScoped;
-	ZoneText(filename, strnlen(filename, nctl::String::MaxCStringLength));
+	ZoneText(filename, nctl::strnlen(filename, nctl::String::MaxCStringLength));
 
 	alGetError();
 	alGenBuffers(NumBuffers, buffersIds_.data());
@@ -69,7 +70,7 @@ AudioStream::AudioStream(AudioData &audioData)
 	FATAL_ASSERT(audioData.isValid());
 
 	ZoneScoped;
-	ZoneText(audioData.filename(), strnlen(audioData.filename(), nctl::String::MaxCStringLength));
+	ZoneText(audioData.filename(), nctl::strnlen(audioData.filename(), nctl::String::MaxCStringLength));
 
 	alGetError();
 	alGenBuffers(NumBuffers, buffersIds_.data());

@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "common_macros.h"
+#include <nctl/CString.h>
 #include "Texture.h"
 #include "TextureData.h"
 #include "ITextureLoader.h"
@@ -25,7 +26,7 @@ Texture::Texture(const char *bufferName, const unsigned char *bufferPtr, unsigne
       minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
 {
 	ZoneScoped;
-	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
+	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
 	glTexture_->bind();
 	setGLTextureLabel(bufferName);
 
@@ -51,7 +52,7 @@ Texture::Texture(const char *filename, int width, int height)
       minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
 {
 	ZoneScoped;
-	ZoneText(filename, strnlen(filename, nctl::String::MaxCStringLength));
+	ZoneText(filename, nctl::strnlen(filename, nctl::String::MaxCStringLength));
 	glTexture_->bind();
 	setGLTextureLabel(filename);
 
@@ -79,7 +80,7 @@ Texture::Texture(const TextureData &texData, int width, int height)
 	FATAL_ASSERT(texData.isValid());
 
 	ZoneScoped;
-	ZoneText(texData.filename(), strnlen(texData.filename(), nctl::String::MaxCStringLength));
+	ZoneText(texData.filename(), nctl::strnlen(texData.filename(), nctl::String::MaxCStringLength));
 	setName(texData.filename());
 	glTexture_->bind();
 	setGLTextureLabel(texData.filename());
