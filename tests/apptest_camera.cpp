@@ -6,6 +6,7 @@
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
 #include "apptest_datapath.h"
+#include <ncine/IFile.h>
 
 namespace {
 
@@ -53,14 +54,67 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	megaTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", MegaTextureFile)).data());
-	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
-	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
-	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
-	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
+	nctl::UniquePtr<nc::IFile> texture1File = nc::IFile::createFileHandle(prefixDataPath("textures", Texture1File).data());
+	uint8_t texture1Buffer[1024 * 1024];
+	texture1File->open(nc::IFile::OpenMode::READ);
+	const unsigned long int texture1BufferSize = texture1File->size();
+	texture1File->read(texture1Buffer, texture1BufferSize);
+	texture1File->close();
 
-	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
-	                                   (prefixDataPath("fonts", FontTextureFile)).data());
+	nctl::UniquePtr<nc::IFile> texture2File = nc::IFile::createFileHandle(prefixDataPath("textures", Texture2File).data());
+	uint8_t texture2Buffer[1024 * 1024];
+	texture2File->open(nc::IFile::OpenMode::READ);
+	const unsigned long int texture2BufferSize = texture2File->size();
+	texture2File->read(texture2Buffer, texture2BufferSize);
+	texture2File->close();
+
+	nctl::UniquePtr<nc::IFile> texture3File = nc::IFile::createFileHandle(prefixDataPath("textures", Texture3File).data());
+	uint8_t texture3Buffer[1024 * 1024];
+	texture3File->open(nc::IFile::OpenMode::READ);
+	const unsigned long int texture3BufferSize = texture3File->size();
+	texture3File->read(texture3Buffer, texture3BufferSize);
+	texture3File->close();
+
+	nctl::UniquePtr<nc::IFile> texture4File = nc::IFile::createFileHandle(prefixDataPath("textures", Texture4File).data());
+	uint8_t texture4Buffer[1024 * 1024];
+	texture4File->open(nc::IFile::OpenMode::READ);
+	const unsigned long int texture4BufferSize = texture4File->size();
+	texture4File->read(texture4Buffer, texture4BufferSize);
+	texture4File->close();
+
+	nctl::UniquePtr<nc::IFile> fontFile = nc::IFile::createFileHandle(prefixDataPath("fonts", FontFntFile).data());
+	uint8_t fontBuffer[1024 * 1024];
+	fontFile->open(nc::IFile::OpenMode::READ);
+	const unsigned long int fontBufferSize = fontFile->size();
+	fontFile->read(fontBuffer, fontBufferSize);
+	fontFile->close();
+
+	nctl::UniquePtr<nc::IFile> fontTexFile = nc::IFile::createFileHandle(prefixDataPath("fonts", FontTextureFile).data());
+	uint8_t fontTexBuffer[1024 * 1024];
+	fontTexFile->open(nc::IFile::OpenMode::READ);
+	const unsigned long int fontTexBufferSize = fontTexFile->size();
+	fontTexFile->read(fontTexBuffer, fontTexBufferSize);
+	fontTexFile->close();
+
+	megaTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", MegaTextureFile)).data());
+
+	textures_.pushBack(nctl::makeUnique<nc::Texture>("EmptyTexture", nc::Texture::Format::RGBA8, 64, 64));
+	//textures_.back()->load(Texture1File, texture1Buffer, texture1BufferSize);
+	//textures_.back()->load((prefixDataPath("textures", Texture1File)).data());
+
+	//textures_.pushBack(nctl::makeUnique<nc::Texture>(Texture1File, texture1Buffer, texture1BufferSize));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>(Texture2File, texture2Buffer, texture2BufferSize));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>(Texture3File, texture3Buffer, texture3BufferSize));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>(Texture4File, texture4Buffer, texture4BufferSize));
+	//textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
+	//textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
+	//textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
+	//textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
+
+	//font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	//                                   (prefixDataPath("fonts", FontTextureFile)).data());
+	font_ = nctl::makeUnique<nc::Font>(FontFntFile, fontBuffer, fontBufferSize,
+	                                   FontTextureFile, fontTexBuffer, fontTexBufferSize);
 
 	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
 
@@ -301,6 +355,55 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	{
 		const bool isSuspended = nc::theApplication().isSuspended();
 		nc::theApplication().setSuspended(!isSuspended);
+	}
+
+	if (event.sym == nc::KeySym::KP1)
+		textures_[0]->loadFromFile(prefixDataPath("textures", Texture1File).data());
+	if (event.sym == nc::KeySym::KP2)
+		textures_[0]->loadFromFile(prefixDataPath("textures", Texture2File).data());
+	if (event.sym == nc::KeySym::KP3)
+		textures_[0]->loadFromFile(prefixDataPath("textures", Texture3File).data());
+	if (event.sym == nc::KeySym::KP4)
+		textures_[0]->loadFromFile(prefixDataPath("textures", Texture4File).data());
+	if (event.sym == nc::KeySym::KP5)
+		textures_[0]->loadFromFile(prefixDataPath("textures", "spritesheet.png").data());
+
+	if (event.sym == nc::KeySym::KP7)
+	{
+		const int w = textures_[0]->width();
+		const int h = textures_[0]->height();
+		uint32_t pixels[w * h];
+		for (int i = 0; i < w * h; i++)
+			pixels[i] = 0xAA0000AA;
+
+		textures_[0]->loadFromTexels((uint8_t *)&pixels);
+	}
+	else if (event.sym == nc::KeySym::KP8)
+	{
+		const int w = textures_[0]->width();
+		const int h = textures_[0]->height();
+		uint32_t pixels[w * h];
+		for (int i = 0; i < w * h; i++)
+			pixels[i] = 0xAAAA00AA;
+
+		textures_[0]->loadFromTexels((uint8_t *)&pixels);
+	}
+	else if (event.sym == nc::KeySym::KP9)
+	{
+		const int w = textures_[0]->width();
+		const int h = textures_[0]->height();
+		uint32_t pixels[w * h];
+		for (int i = 0; i < w * h; i++)
+			pixels[i] = 0xAA00AAAA;
+
+		textures_[0]->loadFromTexels((uint8_t *)&pixels);
+	}
+
+
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		if (sprites_[i]->texture() == textures_[0].get())
+			sprites_[i]->textureHasChanged();
 	}
 }
 

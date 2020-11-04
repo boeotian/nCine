@@ -6,7 +6,6 @@
 
 namespace ncine {
 
-class TextureData;
 class ITextureLoader;
 class GLTexture;
 
@@ -14,6 +13,15 @@ class GLTexture;
 class DLL_PUBLIC Texture : public Object
 {
   public:
+	/// Texture formats
+	enum class Format
+	{
+		R8,
+		RG8,
+		RGB8,
+		RGBA8
+	};
+
 	/// Texture filtering modes
 	enum class Filtering
 	{
@@ -33,19 +41,36 @@ class DLL_PUBLIC Texture : public Object
 		REPEAT
 	};
 
+	/// Creates an OpenGL texture name
+	Texture();
+
+	/// Constructs an empty texture, of a specified format, MIP levels, and size, to be filled later
+	Texture(const char *name, Format format, int mipMapCount, int width, int height);
+	/// Constructs an empty texture, of a specified format, MIP levels, and size using a vector, to be filled later
+	Texture(const char *name, Format format, int mipMapCount, Vector2i size);
+	/// Constructs an empty texture, of a specified format and size, to be filled later
+	Texture(const char *name, Format format, int width, int height);
+	/// Constructs an empty texture, of a specified format and size using a vector, to be filled later
+	Texture(const char *name, Format format, Vector2i size);
+
 	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
-	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize, int width, int height);
-	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize, Vector2i size);
-
 	explicit Texture(const char *filename);
-	Texture(const char *filename, int width, int height);
-	Texture(const char *filename, Vector2i size);
-
-	Texture(const TextureData &texData);
-	Texture(const TextureData &texData, int width, int height);
-	Texture(const TextureData &texData, Vector2i size);
 
 	~Texture() override;
+
+	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	bool loadFromFile(const char *filename);
+
+	/// Loads all texture texels in raw format from a memory buffer
+	bool loadFromTexels(const unsigned char *bufferPtr);
+	/// Loads texels in raw format from a memory buffer to a texture sub-region in the first mip level
+	bool loadFromTexels(const unsigned char *bufferPtr, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+	/// Loads texels in raw format from a memory buffer to a texture sub-region with a rectangle in the first mip level
+	bool loadFromTexels(const unsigned char *bufferPtr, Recti region);
+	/// Loads texels in raw format from a memory buffer to a specific texture mip level and sub-region
+	bool loadFromTexels(const unsigned char *bufferPtr, unsigned int level, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+	/// Loads texels in raw format from a memory buffer to a specific texture mip level and sub-region with a rectangle
+	bool loadFromTexels(const unsigned char *bufferPtr, unsigned int level, Recti region);
 
 	/// Returns texture width
 	inline int width() const { return width_; }
@@ -83,6 +108,8 @@ class DLL_PUBLIC Texture : public Object
 
 	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 
+	// TODO:: Save as Png and WebP?
+
   private:
 	nctl::UniquePtr<GLTexture> glTexture_;
 	int width_;
@@ -101,8 +128,10 @@ class DLL_PUBLIC Texture : public Object
 	/// Deleted assignment operator
 	Texture &operator=(const Texture &) = delete;
 
-	/// Loads a texture overriding the size detected by the texture loader
-	void load(const ITextureLoader &texLoader, int width, int height);
+	/// Initialize an empty texture by creating storage for it
+	void initialize(const ITextureLoader &texLoader);
+	/// Loads the data in a previously initialized texture
+	void load(const ITextureLoader &texLoader);
 
 	/// Sets the OpenGL object label for the texture
 	void setGLTextureLabel(const char *filename);

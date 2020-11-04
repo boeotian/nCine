@@ -19,7 +19,11 @@ FntParser::FntParser(const char *fntFilename)
     : numPageTags_(0), numCharTags_(0), numKerningTags_(0), filename_(fntFilename)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(fntFilename);
+	fileHandle->setExitOnFailToOpen(false);
+
 	fileHandle->open(IFile::OpenMode::READ);
+	if (fileHandle->isOpened() == false)
+		return;
 
 	const long int size = fileHandle->size();
 	nctl::UniquePtr<char[]> fileBuffer = nctl::makeUnique<char[]>(size);

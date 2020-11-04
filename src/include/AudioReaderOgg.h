@@ -18,7 +18,7 @@ class AudioReaderOgg : public IAudioReader
 	AudioReaderOgg(nctl::UniquePtr<IFile> fileHandle, const OggVorbis_File &oggFile);
 	~AudioReaderOgg() override;
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
+	unsigned long int read(void *buffer, unsigned long int bufferSize) const override;
 	void rewind() const override;
 
   private:

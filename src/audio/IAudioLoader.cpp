@@ -21,22 +21,6 @@ IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
       numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
 	// Warning: Cannot call a virtual `init()` here, in the base constructor
-
-	// When reusing `AudioData` each reader needs a new IFile so constructor args are saved
-#ifdef __ANDROID__
-	if (fileHandle_->type() == IFile::FileType::ASSET)
-		constructionInfo_.name.format("%s%s", AssetFile::Prefix, fileHandle_->filename());
-	else
-#else
-		constructionInfo_.name = fileHandle_->filename();
-#endif
-	constructionInfo_.bufferPtr = nullptr;
-	if (fileHandle_->type() == IFile::FileType::MEMORY)
-	{
-		const MemoryFile &memoryFile = static_cast<const MemoryFile &>(*fileHandle_.get());
-		constructionInfo_.bufferPtr = memoryFile.bufferPtr();
-		constructionInfo_.bufferSize = memoryFile.size();
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -45,8 +29,8 @@ IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
 
 const char *IAudioLoader::filename() const
 {
-	// An `InvalidAudioLoader` has no associated file handle and no name
-	return constructionInfo_.name.data();
+	// An `InvalidAudioLoader` has no associated file handle
+	return fileHandle_ ? fileHandle_->filename() : nullptr;
 }
 
 nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)

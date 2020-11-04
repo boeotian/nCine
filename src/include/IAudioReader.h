@@ -15,7 +15,7 @@ class IAudioReader
 	 * \param bufferSize Buffer size in bytes
 	 * \return Number of bytes read
 	 */
-	virtual unsigned long int read(char *buffer, unsigned long int bufferSize) const = 0;
+	virtual unsigned long int read(void *buffer, unsigned long int bufferSize) const = 0;
 
 	/// Resets the audio file seek value
 	virtual void rewind() const = 0;
@@ -24,7 +24,7 @@ class IAudioReader
 class InvalidAudioReader : IAudioReader
 {
   public:
-	inline unsigned long int read(char *buffer, unsigned long int bufferSize) const override { return 0; }
+	inline unsigned long int read(void *buffer, unsigned long int bufferSize) const override { return 0; }
 	inline void rewind() const override {};
 };
 

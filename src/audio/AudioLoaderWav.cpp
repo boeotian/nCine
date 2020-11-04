@@ -36,7 +36,6 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
 	RETURN_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 
-	constructionInfo_.seek = fileHandle_->tell();
 	hasLoaded_ = true;
 }
 
@@ -46,24 +45,6 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 
 nctl::UniquePtr<IAudioReader> AudioLoaderWav::createReader()
 {
-	if (fileHandle_ == nullptr)
-	{
-		if (constructionInfo_.bufferPtr == nullptr)
-			fileHandle_ = IFile::createFileHandle(constructionInfo_.name.data());
-		else
-			fileHandle_ = IFile::createFromMemory(constructionInfo_.name.data(), constructionInfo_.bufferPtr, constructionInfo_.bufferSize);
-
-#ifdef __ANDROID__
-		if (fileHandle_->type() == IFile::FileType::ASSET)
-			fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
-		else
-#endif
-			fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-
-		fileHandle_->seek(constructionInfo_.seek, SEEK_SET);
-	}
-	ASSERT(fileHandle_->isOpened());
-
 	return nctl::makeUnique<AudioReaderWav>(nctl::move(fileHandle_));
 }
 

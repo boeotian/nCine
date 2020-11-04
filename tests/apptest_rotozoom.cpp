@@ -5,16 +5,6 @@
 #include <ncine/Sprite.h>
 #include "apptest_datapath.h"
 
-#define LOAD_FROM_MEMORY (0)
-#define USE_TEXTUREDATA (0)
-
-#if LOAD_FROM_MEMORY
-	#include <ncine/IFile.h>
-#endif
-#if USE_TEXTUREDATA
-	#include <ncine/TextureData.h>
-#endif
-
 namespace {
 
 #ifdef __ANDROID__
@@ -43,31 +33,7 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-#if LOAD_FROM_MEMORY
-	nctl::UniquePtr<nc::IFile> megaTextureFile = nc::IFile::createFileHandle(prefixDataPath("textures", TextureFile).data());
-	uint8_t megaTextureBuffer[24 * 1024];
-	megaTextureFile->open(nc::IFile::OpenMode::READ);
-	const unsigned long int megaTextureBufferSize = megaTextureFile->size();
-	FATAL_ASSERT(megaTextureBufferSize <= sizeof(megaTextureBuffer));
-	megaTextureFile->read(megaTextureBuffer, megaTextureBufferSize);
-	megaTextureFile->close();
-
-	#if USE_TEXTUREDATA
-	nc::TextureData megaTextureData(TextureFile, megaTextureBuffer, megaTextureBufferSize);
-	FATAL_ASSERT(megaTextureData.isValid());
-	megaTexture_ = nctl::makeUnique<nc::Texture>(megaTextureData);
-	#else
-	megaTexture_ = nctl::makeUnique<nc::Texture>(TextureFile, megaTextureBuffer, megaTextureBufferSize);
-	#endif
-#else
-	#if USE_TEXTUREDATA
-	nc::TextureData megaTextureData(prefixDataPath("textures", TextureFile).data());
-	FATAL_ASSERT(megaTextureData.isValid());
-	megaTexture_ = nctl::makeUnique<nc::Texture>(megaTextureData);
-	#else
 	megaTexture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
-	#endif
-#endif
 
 	texRects.pushBack(nc::Recti(0, 0, 128, 128));
 	texRects.pushBack(nc::Recti(128, 0, 128, 128));

@@ -64,6 +64,8 @@ class ITextureLoader
 	TextureFormat texFormat_;
 	nctl::UniquePtr<GLubyte[]> pixels_;
 
+	/// An empty constructor only used by `TextureLoaderRaw`
+	ITextureLoader();
 	explicit ITextureLoader(nctl::UniquePtr<IFile> fileHandle);
 
 	static nctl::UniquePtr<ITextureLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);

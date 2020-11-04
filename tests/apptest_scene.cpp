@@ -144,12 +144,24 @@ void MyEventHandler::onInit()
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
-	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
+	//textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>("stocazzo", nc::Texture::Format::RGBA8, 128, 128));
+
+	unsigned char pixels[100 * 1024];
+	for (int i = 0; i < 128 * 128; i++)
+	{
+		pixels[i * 3 + 0] = 125;
+		pixels[i * 3 + 1] = 0;
+		pixels[i * 3 + 2] = 0;
+		pixels[i * 3 + 3] = 125;
+	}
+
+	textures_.back()->loadFromTexels(pixels);
 
 	const float width = nc::theApplication().width();
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, 0.0f));
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, 300.0f));
 		sprites_.back()->setScale(0.5f);
 	}
 }
@@ -165,11 +177,13 @@ void MyEventHandler::onFrameStart()
 			angle_ -= 360.0f;
 	}
 
+#if 0
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
 		sprites_[i]->y = height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i));
 		sprites_[i]->setRotation(angle_ * 20.0f);
 	}
+#endif
 
 #if NCINE_WITH_IMGUI
 	static char imguiTextInput[MaxBufferLength];

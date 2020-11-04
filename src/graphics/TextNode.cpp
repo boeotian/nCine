@@ -70,21 +70,21 @@ float TextNode::absHeight() const
 
 void TextNode::setFont(Font *font)
 {
-	if (font && font != font_)
-	{
-		// Keep the ratio between text node lineHeight and font one
-		lineHeight_ = (lineHeight_ / font_->lineHeight()) * font->lineHeight();
+	// Allow self-assigning to act as the `textureHasChanged()` method
+	// of sprites in the case the font stays the same but it loads new data
 
-		font_ = font;
-		const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
-		                                                          ? Material::ShaderProgramType::TEXTNODE_RED
-		                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
-		renderCommand_->material().setShaderProgramType(shaderProgramType);
-		renderCommand_->material().setTexture(*font_->texture());
+	// Keep the ratio between text node lineHeight and font one
+	lineHeight_ = (lineHeight_ / font_->lineHeight()) * font->lineHeight();
 
-		dirtyDraw_ = true;
-		dirtyBoundaries_ = true;
-	}
+	font_ = font;
+	const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
+	                                                          ? Material::ShaderProgramType::TEXTNODE_RED
+	                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
+	renderCommand_->material().setShaderProgramType(shaderProgramType);
+	renderCommand_->material().setTexture(*font_->texture());
+
+	dirtyDraw_ = true;
+	dirtyBoundaries_ = true;
 }
 
 void TextNode::enableKerning(bool withKerning)

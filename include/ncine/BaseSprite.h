@@ -38,6 +38,9 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// Flips the texture rect vertically
 	void setFlippedY(bool flippedY);
 
+	/// Performs the required tasks upon a change in the texture
+	virtual void textureHasChanged() = 0;
+
   protected:
 	/// The sprite texture
 	Texture *texture_;

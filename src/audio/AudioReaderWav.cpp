@@ -19,7 +19,7 @@ AudioReaderWav::AudioReaderWav(nctl::UniquePtr<IFile> fileHandle)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned long int AudioReaderWav::read(char *buffer, unsigned long int bufferSize) const
+unsigned long int AudioReaderWav::read(void *buffer, unsigned long int bufferSize) const
 {
 	ASSERT(buffer);
 	ASSERT(bufferSize > 0);

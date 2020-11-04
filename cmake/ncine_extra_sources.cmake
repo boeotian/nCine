@@ -90,7 +90,6 @@ if(OPENAL_FOUND)
 	target_link_libraries(ncine PRIVATE OpenAL::AL)
 
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/ncine/AudioData.h
 		${NCINE_ROOT}/include/ncine/AudioBuffer.h
 		${NCINE_ROOT}/include/ncine/AudioStream.h
 		${NCINE_ROOT}/include/ncine/IAudioPlayer.h
@@ -111,7 +110,6 @@ if(OPENAL_FOUND)
 		${NCINE_ROOT}/src/audio/IAudioLoader.cpp
 		${NCINE_ROOT}/src/audio/AudioLoaderWav.cpp
 		${NCINE_ROOT}/src/audio/AudioReaderWav.cpp
-		${NCINE_ROOT}/src/audio/AudioData.cpp
 		${NCINE_ROOT}/src/audio/AudioBuffer.cpp
 		${NCINE_ROOT}/src/audio/AudioStream.cpp
 		${NCINE_ROOT}/src/audio/IAudioPlayer.cpp

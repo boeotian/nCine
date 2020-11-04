@@ -14,7 +14,7 @@ class AudioReaderWav : public IAudioReader
   public:
 	AudioReaderWav(nctl::UniquePtr<IFile> fileHandle);
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
+	unsigned long int read(void *buffer, unsigned long int bufferSize) const override;
 	void rewind() const override;
 
   private:

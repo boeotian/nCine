@@ -27,12 +27,26 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	inline unsigned int sourceId() const { return sourceId_; }
 	/// Returns the OpenAL id of the currently playing buffer
 	virtual unsigned int bufferId() const = 0;
+
+	/// Returns the number of bytes per sample
+	virtual int bytesPerSample() const = 0;
 	/// Returns the number of audio channels of the currently playing buffer
 	virtual int numChannels() const = 0;
 	/// Returns the samples frequency of the currently playing buffer
 	virtual int frequency() const = 0;
+
+	/// Returns the number of samples
+	virtual unsigned long int numSamples() const = 0;
+	/// Returns the duration in seconds
+	virtual float duration() const = 0;
+
 	/// Returns the size of the currently playing buffer in bytes
 	virtual unsigned long bufferSize() const = 0;
+
+	/// Returns the playback position expressed in samples
+	int sampleOffset() const;
+	/// Sets the playback position expressed in samples
+	void setSampleOffset(int offset);
 
 	/// Starts playing
 	virtual void play() = 0;

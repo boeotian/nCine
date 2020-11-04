@@ -40,7 +40,10 @@ void BaseSprite::setSize(float width, float height)
 void BaseSprite::setTexture(Texture *texture)
 {
 	if (texture)
+	{
 		texture_ = texture;
+		textureHasChanged();
+	}
 }
 
 void BaseSprite::setTexRect(const Recti &rect)

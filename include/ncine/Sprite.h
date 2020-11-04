@@ -22,6 +22,8 @@ class DLL_PUBLIC Sprite : public BaseSprite
 	/// Constructor for a sprite with a texture and a specified position as a vector but no parent
 	Sprite(Texture *texture, const Vector2f &position);
 
+	void textureHasChanged() override;
+
 	inline static ObjectType sType() { return ObjectType::SPRITE; }
 };
 

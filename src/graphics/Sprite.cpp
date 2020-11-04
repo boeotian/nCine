@@ -59,4 +59,19 @@ Sprite::Sprite(Texture *texture, const Vector2f &position)
 {
 }
 
+void Sprite::textureHasChanged()
+{
+	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)
+	{
+		const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3
+		                                                      ? Material::ShaderProgramType::SPRITE
+		                                                      : Material::ShaderProgramType::SPRITE_GRAY;
+		renderCommand_->material().setShaderProgramType(shaderProgramType);
+	}
+
+	width_ = texture_->width();
+	height_ = texture_->height();
+	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
+
 }

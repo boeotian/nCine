@@ -16,16 +16,17 @@ class IAudioLoader
 	/// Returns true if the audio has been correctly loaded
 	inline bool hasLoaded() const { return hasLoaded_; }
 
-	/// Returns the duration in seconds
-	inline float duration() const { return duration_; }
-	/// Returns number of samples
-	inline unsigned long int numSamples() const { return numSamples_; }
 	/// Returns number of bytes per sample
 	inline int bytesPerSample() const { return bytesPerSample_; }
 	/// Returns number of channels
 	inline int numChannels() const { return numChannels_; }
 	/// Returns samples frequency
 	inline int frequency() const { return frequency_; }
+
+	/// Returns number of samples
+	inline unsigned long int numSamples() const { return numSamples_; }
+	/// Returns the duration in seconds
+	inline float duration() const { return duration_; }
 
 	/// Returns the decoded buffer size in bytes
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
@@ -58,15 +59,6 @@ class IAudioLoader
 	unsigned long int numSamples_;
 	/// Duration in seconds
 	float duration_;
-
-	/// `IFile` construction arguments and information
-	struct ConstructionInfo
-	{
-		nctl::String name;
-		const unsigned char *bufferPtr;
-		unsigned long int bufferSize;
-		long int seek;
-	} constructionInfo_;
 
 	explicit IAudioLoader(nctl::UniquePtr<IFile> fileHandle);
 

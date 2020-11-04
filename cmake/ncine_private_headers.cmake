@@ -20,6 +20,7 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/Particle.h
 	${NCINE_ROOT}/src/include/TextureFormat.h
 	${NCINE_ROOT}/src/include/ITextureLoader.h
+	${NCINE_ROOT}/src/include/TextureLoaderRaw.h
 	${NCINE_ROOT}/src/include/TextureLoaderDds.h
 	${NCINE_ROOT}/src/include/TextureLoaderPvr.h
 	${NCINE_ROOT}/src/include/TextureLoaderKtx.h

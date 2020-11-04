@@ -49,9 +49,9 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 #endif
 		fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
-	if (ov_test_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks) != 0)
+	if (ov_open_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks) != 0)
 	{
-		LOGF_X("Cannot open \"%s\" with ov_test_callbacks()", fileHandle_->filename());
+		LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
 		fileHandle_->close();
 		return;
 	}
@@ -84,27 +84,6 @@ AudioLoaderOgg::~AudioLoaderOgg()
 
 nctl::UniquePtr<IAudioReader> AudioLoaderOgg::createReader()
 {
-	if (fileHandle_ == nullptr)
-	{
-		if (constructionInfo_.bufferPtr == nullptr)
-			fileHandle_ = IFile::createFileHandle(constructionInfo_.name.data());
-		else
-			fileHandle_ = IFile::createFromMemory(constructionInfo_.name.data(), constructionInfo_.bufferPtr, constructionInfo_.bufferSize);
-
-#ifdef __ANDROID__
-		if (fileHandle_->type() == IFile::FileType::ASSET)
-			fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
-		else
-#endif
-			fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-
-		ov_test_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks);
-
-		// File is closed by `ov_clear()`
-		fileHandle_->setCloseOnDestruction(false);
-	}
-	ASSERT(fileHandle_->isOpened());
-
 	return nctl::makeUnique<AudioReaderOgg>(nctl::move(fileHandle_), oggFile_);
 }
 

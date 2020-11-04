@@ -27,6 +27,18 @@ IAudioPlayer::IAudioPlayer(ObjectType type)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+int IAudioPlayer::sampleOffset() const
+{
+	int byteOffset = 0;
+	alGetSourcei(sourceId_, AL_SAMPLE_OFFSET, &byteOffset);
+	return byteOffset;
+}
+
+void IAudioPlayer::setSampleOffset(int byteOffset)
+{
+	alSourcei(sourceId_, AL_SAMPLE_OFFSET, byteOffset);
+}
+
 /*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setGain(float gain)
 {

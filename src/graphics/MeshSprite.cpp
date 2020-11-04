@@ -193,4 +193,18 @@ void MeshSprite::setIndices(const MeshSprite &meshSprite)
 	setIndices(meshSprite.numIndices_, meshSprite.indexDataPointer_);
 }
 
+void MeshSprite::textureHasChanged()
+{
+	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)
+	{
+		const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3
+		                                                      ? Material::ShaderProgramType::MESH_SPRITE
+		                                                      : Material::ShaderProgramType::MESH_SPRITE_GRAY;
+		renderCommand_->material().setShaderProgramType(shaderProgramType);
+	}
+
+	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
+
+
 }

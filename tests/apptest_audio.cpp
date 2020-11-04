@@ -5,6 +5,7 @@
 #include <ncine/AudioStream.h>
 #include <ncine/AudioStreamPlayer.h>
 #include <ncine/TextNode.h>
+#include <ncine/IFile.h>
 #include "apptest_datapath.h"
 
 namespace {
@@ -53,12 +54,36 @@ void MyEventHandler::onInit()
 	xPos_ = DefaultXPos;
 	isLooping_ = false;
 
+	nctl::UniquePtr<nc::IFile> musicFile = nc::IFile::createFileHandle(prefixDataPath("sounds", "music.ogg").data());
+	uint8_t musicBuffer[1024 * 1024];
+	musicFile->open(nc::IFile::OpenMode::READ);
+	const unsigned long int musicBufferSize = musicFile->size();
+	musicFile->read(musicBuffer, musicBufferSize);
+	musicFile->close();
+
+	nctl::UniquePtr<nc::IFile> audioFile = nc::IFile::createFileHandle(prefixDataPath("sounds", "bomb.wav").data());
+	uint8_t audioBuffer[1024 * 1024];
+	audioFile->open(nc::IFile::OpenMode::READ);
+	const unsigned long int audioBufferSize = audioFile->size();
+	audioFile->read(audioBuffer, audioBufferSize);
+	audioFile->close();
+
+	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>("MemoryFile_music.ogg", musicBuffer, musicBufferSize);
+	//musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>(musicData);
+	//audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>("MemoryFile_bomb.wav", audioBuffer, audioBufferSize);
+	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>("stocazzo", nc::AudioBuffer::Format::MONO16, 44100);
+	//audioBuffer_->loadFromSamples(audioBuffer, audioBufferSize);
+
+	const unsigned int audioBufferSize2 = 44100 * 3;
+	int16_t audioBuffer2[audioBufferSize2];
+	for (unsigned int i = 0; i < audioBufferSize2; i++)
+		audioBuffer2[i] = sinf(2.0f * nc::Pi * i * 440 / 44100) * 32.767;
+	audioBuffer_->loadFromSamples((unsigned char*)(&audioBuffer2), audioBufferSize2 * sizeof(int16_t));
+
+	soundPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
+
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
-	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>(prefixDataPath("sounds", "music.ogg").data());
-	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>(prefixDataPath("sounds", "bomb.wav").data());
-	soundPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
-	soundPlayer_->play();
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);

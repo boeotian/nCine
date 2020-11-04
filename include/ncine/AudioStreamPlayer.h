@@ -11,18 +11,30 @@ namespace ncine {
 class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 {
   public:
+	/// Default constructor
+	AudioStreamPlayer();
 	/// A constructor creating a player from a named memory buffer
 	AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a player from a file
 	explicit AudioStreamPlayer(const char *filename);
-	/// Constructor creating a player from an audio data class
-	explicit AudioStreamPlayer(AudioData &audioData);
 	~AudioStreamPlayer() override;
 
+	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	bool loadFromFile(const char *filename);
+
 	inline unsigned int bufferId() const override { return audioStream_.bufferId(); }
+
+	inline int bytesPerSample() const override { return audioStream_.bytesPerSample(); }
 	inline int numChannels() const override { return audioStream_.numChannels(); }
 	inline int frequency() const override { return audioStream_.frequency(); }
-	unsigned long bufferSize() const override { return audioStream_.bufferSize(); }
+
+	inline unsigned long int numSamples() const override { return audioStream_.numSamples(); }
+	inline float duration() const override { return audioStream_.duration(); }
+
+	inline unsigned long bufferSize() const override { return audioStream_.bufferSize(); }
+
+	inline unsigned long int numStreamSamples() const { return audioStream_.numStreamSamples(); }
+	inline int streamBufferSize() const { return audioStream_.streamBufferSize(); }
 
 	void play() override;
 	void pause() override;

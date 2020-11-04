@@ -70,6 +70,8 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Sets the indices data to the data used by another sprite
 	void setIndices(const MeshSprite &meshSprite);
 
+	void textureHasChanged() override;
+
 	inline static ObjectType sType() { return ObjectType::MESH_SPRITE; }
 
   private:
