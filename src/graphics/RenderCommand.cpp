@@ -123,6 +123,13 @@ void RenderCommand::commitTransformation()
 			if (RenderResources::hasProjectionChanged(isBatchedType(shaderProgramType)))
 				material_.uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 		}
+
+		if (shaderProgramType == Material::ShaderProgramType::CUSTOM)
+		{
+			material_.uniform("modelView")->setFloatVector(modelView_.data());
+			if (RenderResources::hasProjectionChanged(false))
+				material_.uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+		}
 	}
 }
 

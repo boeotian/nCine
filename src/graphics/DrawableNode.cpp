@@ -1,4 +1,5 @@
 #include <nctl/algorithms.h>
+#include "Shader.h"
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
@@ -76,7 +77,8 @@ unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
 
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
-      renderCommand_(nctl::makeUnique<RenderCommand>())
+      renderCommand_(nctl::makeUnique<RenderCommand>()),
+      shaderState_(renderCommand_->material())
 {
 	renderCommand_->setIdSortKey(id());
 }

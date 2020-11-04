@@ -325,7 +325,8 @@ void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 void TextNode::updateRenderCommand()
 {
 	renderCommand_->transformation() = worldMatrix_;
-	textnodeBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
+	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)
+		textnodeBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
 }
 
 }

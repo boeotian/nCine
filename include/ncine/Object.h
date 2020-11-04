@@ -13,6 +13,7 @@ class DLL_PUBLIC Object
 	enum class ObjectType
 	{
 		BASE = 0,
+		SHADER,
 		TEXTURE,
 		SCENENODE,
 		SPRITE,

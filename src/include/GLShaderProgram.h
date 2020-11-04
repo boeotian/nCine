@@ -58,6 +58,10 @@ class GLShaderProgram
 	void link(Introspection introspection);
 	void use();
 
+	/// Sets the fatal assert on errors flag
+	/*! If the flag is true the application fatal asserts if the shader program cannot be compiled or linked. */
+	inline void setFatalAssertOnErrors(bool shouldFatalAssertOnErrors) { shouldFatalAssertOnErrors_ = shouldFatalAssertOnErrors; }
+
   private:
 	/// Max number of discoverable uniforms
 	static const int MaxNumUniforms = 32;
@@ -70,6 +74,10 @@ class GLShaderProgram
 	Status status_;
 	Introspection introspection_;
 	QueryPhase queryPhase_;
+
+	/// A flag indicating whether the class should fatal assert on compilation and linking errors
+	/*! Useful for custom shaders creation. */
+	bool shouldFatalAssertOnErrors_;
 
 	unsigned int uniformsSize_;
 	unsigned int uniformBlocksSize_;

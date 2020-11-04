@@ -3,11 +3,13 @@
 
 #include "SceneNode.h"
 #include "Rect.h"
+#include "ShaderState.h" // TODO: instance or smart pointer?
 
 namespace ncine {
 
 class RenderCommand;
 class RenderQueue;
+class Shader;
 
 /// A class for objects that can be drawn through the render queue
 class DLL_PUBLIC DrawableNode : public SceneNode
@@ -111,6 +113,11 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Sets a specific source and destination blending factors
 	void setBlendingFactors(BlendingFactor srcBlendingFactor, BlendingFactor destBlendingFactor);
 
+	/// Returns the constant state for the custom shader of the node
+	inline const ShaderState &shaderState() const { return shaderState_; }
+	/// Returns the state for the custom shader of the node
+	inline ShaderState &shaderState() { return shaderState_; }
+
 	/// Returns the node rendering layer
 	unsigned short layer() const;
 	/// Sets the node rendering layer
@@ -130,6 +137,9 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 
 	/// The render command class associated with this node
 	nctl::UniquePtr<RenderCommand> renderCommand_;
+
+	/// The state for a custom user shader
+	ShaderState shaderState_; // TODO: instance or smart pointer?
 
 	/// Axis Aligned Bounding Box of the node area
 	Rectf aabb_;
